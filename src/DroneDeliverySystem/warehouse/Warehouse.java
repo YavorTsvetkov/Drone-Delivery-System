@@ -52,7 +52,15 @@ public class Warehouse {
 		} else {
 			getProducts().put(product.getId(), new ProductWrapper(product, quantity));
 		}
-		
+	}
+	
+	public void incrementProductQuantity(int productID, int quantity) {
+		if (!getProducts().containsKey(productID)) {
+			throw new IllegalArgumentException("There is no such product "
+					+ "that corresponds to id " + productID);
+		}
+		int newQuantity = getProducts().get(productID).getQuantity() + quantity;
+		getProducts().get(productID).setQuantity(newQuantity);
 	}
 
 }

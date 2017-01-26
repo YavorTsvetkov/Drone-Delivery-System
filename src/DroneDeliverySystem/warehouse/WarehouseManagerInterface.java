@@ -19,4 +19,6 @@ public interface WarehouseManagerInterface {
 	public double calcWeightUnit(int id, int quantity);
 	
 	public void decreaseProductQuantity(int id, int quantity);
+	
+	public Warehouse getContractorWarehouse(int id, int quantity);
 }

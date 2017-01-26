@@ -3,17 +3,16 @@ package DroneDeliverySystem;
 import java.util.*;
 
 import DroneDeliverySystem.request.Request;
-
+import DroneDeliverySystem.supply.Supply;
 import DroneDeliverySystem.request.*;
 
 public class Main {
 
 	public static void main(String[] args) {
-		
-		Queue<Request> requests = readRequest();
+		/**
+		Queue<Request> requests = Request.readRequest();
 		
 		RequestManager reqM = Initializer.initRequestManager();
-		
 		
 		Iterator<Request> iterator = requests.iterator();
 		while (iterator.hasNext()) {
@@ -25,38 +24,31 @@ public class Main {
 		
 		System.out.printf("Available drones number: %d%n", availableDronesNum);
 		System.out.printf("Unavailable drones number: %d", unavalableDronesNum);
+		**/
+		
+		Queue<Supply> supplies = Supply.readSupply();
+		System.out.println(supplies.size());
 	}
 	
-	public static Queue<Request> readRequest() {
+	public static Object readInput() {
 		Scanner input = new Scanner(System.in);
 		
-		System.out.print("Enter time stamp: ");
-		String timeStamp = input.nextLine();
+		System.out.println("What would you like to do? Request or supply?%n"
+				+ "for request type /'request/' for supply type /'supply/'");
 		
-		System.out.print("Enter row: ");
-		int row = Integer.parseInt(input.nextLine());
+		String keyWord = input.nextLine();
 		
-		System.out.print("Enter column: ");
-		int column = Integer.parseInt(input.nextLine());
-		
-		System.out.print("Enter the number of deliveries: ");
-		int n = Integer.parseInt(input.nextLine());
-		
-		Queue<Request> requests = new LinkedList<Request>();
-		
-		for (int i = 0; i < n; i++) {
-			System.out.print("Enter product id: ");
-			int id = Integer.parseInt(input.nextLine());
+		if (keyWord.equals("request")) {
+			return Request.readRequest();
 			
-			System.out.print("Enter product quantity: ");
-			int quantity = Integer.parseInt(input.nextLine());
-			Request req = new Request(id, quantity);
+		} else if (keyWord.equals("supply")) {
+			return Supply.readSupply();
 			
-			requests.add(req);
+		} else {
+			System.out.println("Please type /'request/' or /'supply/'");
 		}
 		
-		
-		return requests;
+		return null;
 	}
-
+	
 }

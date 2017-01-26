@@ -1,7 +1,14 @@
 package DroneDeliverySystem.request;
 
 import DroneDeliverySystem.warehouse.*;
+
+import java.awt.Point;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Queue;
+
 import DroneDeliverySystem.drones.*;
+import DroneDeliverySystem.supply.Supply;
 
 public class RequestManager {
 	
@@ -60,7 +67,64 @@ public class RequestManager {
 		
 		getDroneManager().sendDrones(weight);
 		
-		System.out.printf("Product id %d delivered with %d drone(s).%n", requestId, 
-																	   dronesNumber);
+		String estimatedTime = estimateTime(request);
+		
+		System.out.printf("Product id %d delivered at %s "
+				+ "with %d drone(s).%n", requestId, 
+				                         estimatedTime, 
+										 dronesNumber);
 	}
+	
+	private String estimateTime(Request request) {
+		double distance = calcDistance(request);
+		System.out.printf("Distance: %.2f", distance);
+		int velocity = 1;
+		
+		int minutes = (int)distance / velocity;
+		Date timestamp = request.getTimestamp();
+		
+		long timestampSeconds = (long)timestamp.getTime();
+		
+		long resultTime = timestampSeconds + (minutes * 60)*1000;
+		//timestamp.setMinutes(timestamp.getMinutes() + minutes);
+		Date date = new Date(resultTime);
+		return date.toString();
+	}
+	
+	public double calcDistance(Request request) {
+		int id = request.getId();
+		int quantity = request.getQuantity();
+		/**
+		Warehouse warehouse = this.warehouseManager.
+								   getContractorWarehouse(id, quantity);
+		**/
+		
+		Warehouse warehouse = warehouseManager.getWarehouses().get(2);
+		Point warehouseAddress = warehouse.getCoordinates();
+		Point requestAddress = new Point(request.getRowAdress(), request.getColumnAdress());
+		
+		double deltaRow = warehouseAddress.getY() - requestAddress.getY();
+		double deltaColumn = warehouseAddress.getX() - requestAddress.getX();
+		double sumOfSquares = deltaRow * deltaRow + deltaColumn * deltaColumn;
+		
+		double distance = Math.sqrt(sumOfSquares);
+		
+		return distance;
+	}
+	
+	public void processSupply(Queue<Supply> supplies) {
+		for (Supply supply : supplies) {	
+			int productID = supply.getProductInfo().getId();
+			int quantity = supply.getProductInfo().getQuantity();
+			int warehouseID = supply.getWarehouseID();
+			Warehouse correspondingWarehouse = this.warehouseManager.
+					retrieveWarehouse(warehouseID);
+	
+			if (correspondingWarehouse == null) {
+				throw new NullPointerException("There is no such warehouse with id "
+						+ productID);
+			}
+			correspondingWarehouse.incrementProductQuantity(productID, quantity);
+		}
+	} 
 }

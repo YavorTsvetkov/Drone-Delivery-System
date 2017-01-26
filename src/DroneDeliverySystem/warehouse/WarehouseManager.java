@@ -1,33 +1,49 @@
 package DroneDeliverySystem.warehouse;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 public class WarehouseManager implements WarehouseManagerInterface {
 	
-	private List<Warehouse> warehouses;
+	/**
+	 * keeps all warehouses.
+	 * key - warehouse ID
+	 * value - warehouse
+	 */
+	private Map<Integer, Warehouse> warehouses;
 
-	public List<Warehouse> getWarehouses() {
+	public Map<Integer, Warehouse> getWarehouses() {
 		return warehouses;
 	}
 	
-	public void setWarehouses(List<Warehouse> warehouses) {
+	public void setWarehouses(Map<Integer, Warehouse> warehouses) {
 		this.warehouses = warehouses;
 	}
+	
+	public WarehouseManager() {
+		this.warehouses = new HashMap<Integer, Warehouse>();
+	}
 
-	public WarehouseManager(List<Warehouse> warehousesList) {
-		this.warehouses = new ArrayList<Warehouse>();
+	public WarehouseManager(Map<Integer, Warehouse> warehousesList) {
 		this.setWarehouses(warehousesList);
 	}
 
 	public void addWarehouse(Warehouse w) {
-		getWarehouses().add(w);
+		int newID = getWarehouses().size() + 1;
+		getWarehouses().put(newID, w);
 	}
 	
+	/**
+	 * Searching a product in all warehouses by its ID and desired quantity.
+	 * @param id - desired product ID
+	 * @param quantity - desired product quantity
+	 * @return - product wrapper (product and its quantity) if the product has enough quantity
+	 * or null if the product has less quantity than desired.
+	 */
 	private ProductWrapper searchProductAndQuantity(int id, int quantity) {
-		for (Warehouse warehouse : getWarehouses()) {
-			Map<Integer, ProductWrapper> products = warehouse.getProducts();
+		for (Map.Entry<Integer, Warehouse> entry : warehouses.entrySet()) {
+			Warehouse currentWarehouse = entry.getValue();
+			Map<Integer, ProductWrapper> products = currentWarehouse.getProducts();
 			
 			if (products.containsKey(id)) {
 				if (products.get(id).getQuantity() >= quantity) {
@@ -52,7 +68,8 @@ public class WarehouseManager implements WarehouseManagerInterface {
 		ProductWrapper product = searchProductAndQuantity(id, quantity);
 		
 		if (product == null) {
-			throw new IllegalArgumentException("Thre is not such product in the arehouses.");
+			throw new IllegalArgumentException(
+					"There is no such product in the warehouses.");
 		}
 		
 		return product.getProduct().getWeight() * quantity;
@@ -64,4 +81,30 @@ public class WarehouseManager implements WarehouseManagerInterface {
 		
 		product.setQuantity(newQuantity);
 	}
+
+	public Warehouse getContractorWarehouse(int id, int quantity) {
+		for (Map.Entry<Integer, Warehouse> entry : warehouses.entrySet()) {
+			Warehouse currentWarehouse = entry.getValue();
+			Map<Integer, ProductWrapper> products = currentWarehouse.getProducts();
+			
+			if (products.containsKey(id)) {
+				if (products.get(id).getQuantity() >= quantity) {
+					return currentWarehouse;
+				}
+			}
+		}	
+		
+		return null;
+	}
+	
+	public Warehouse retrieveWarehouse(int warehouseID) {
+		for (Map.Entry<Integer, Warehouse> warehouse : this.warehouses.entrySet()) {
+			if (warehouse.getKey() == warehouseID) {
+				return warehouse.getValue();
+			}
+		}
+		
+		return null;
+	}
+			
 }
